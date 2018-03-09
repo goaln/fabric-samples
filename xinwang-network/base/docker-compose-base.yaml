@@ -7,30 +7,6 @@ version: '2'
 
 services:
 
-  orderer.belink.com:
-    container_name: orderer.belink.com
-    image: hyperledger/fabric-orderer:x86_64-1.1.0-alpha
-    environment:
-      - ORDERER_GENERAL_LOGLEVEL=debug
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      # enabled TLS
-      - ORDERER_GENERAL_TLS_ENABLED=true
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-    command: orderer
-    volumes:
-    - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-    - ../crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp:/var/hyperledger/orderer/msp
-    - ../crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/tls/:/var/hyperledger/orderer/tls
-    ports:
-      - 7050:7050
-
   peer0.blockchain.belink.com:
     container_name: peer0.blockchain.belink.com
     extends:
@@ -45,6 +21,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.blockchain.belink.com:/var/hyperledger/production
     ports:
       - 7051:7051
       - 7053:7053
@@ -64,7 +41,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer1.blockchain.belink.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer1.blockchain.belink.com/tls:/etc/hyperledger/fabric/tls
-
+        - peer1.blockchain.belink.com:/var/hyperledger/production
     ports:
       - 8051:7051
       - 8053:7053
@@ -84,6 +61,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.blockchain.xinwang.com:/var/hyperledger/production
     ports:
       - 9051:7051
       - 9053:7053
@@ -103,6 +81,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer1.blockchain.xinwang.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer1.blockchain.xinwang.com/tls:/etc/hyperledger/fabric/tls
+        - peer1.blockchain.xinwang.com:/var/hyperledger/production
     ports:
       - 10051:7051
       - 10053:7053
@@ -122,6 +101,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.blockchain.keshang.com:/var/hyperledger/production
     ports:
       - 11051:7051
       - 11053:7053
@@ -141,6 +121,7 @@ services:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer1.blockchain.keshang.com/msp:/etc/hyperledger/fabric/msp
         - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer1.blockchain.keshang.com/tls:/etc/hyperledger/fabric/tls
+        - peer1.blockchain.keshang.com:/var/hyperledger/production
     ports:
       - 12051:7051
       - 12053:7053

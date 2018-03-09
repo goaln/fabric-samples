@@ -136,8 +136,8 @@ function networkJoin () {
 
 # Tear down running network
 function networkDown () {
-  docker-compose -f $COMPOSE_FILE down
-  docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down
+  docker-compose -f $COMPOSE_FILE down --volumes
+  docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down --volumes
   # Don't remove containers, images, etc if restarting
   if [ "$MODE" != "restart" ]; then
     #Cleanup the chaincode containers
@@ -145,7 +145,7 @@ function networkDown () {
     #Cleanup images
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
-    rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config
+    # rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
   fi
