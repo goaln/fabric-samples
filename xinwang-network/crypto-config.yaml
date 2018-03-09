@@ -1,0 +1,46 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # Orderer
+  # ---------------------------------------------------------------------------
+  - Name: Orderer
+    Domain: belink.com
+    # ---------------------------------------------------------------------------
+    # "Specs" - See PeerOrgs below for complete description
+    # ---------------------------------------------------------------------------
+    Specs:
+      - Hostname: orderer
+# ---------------------------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+# ---------------------------------------------------------------------------
+PeerOrgs:
+  # ---------------------------------------------------------------------------
+  # Org1
+  # ---------------------------------------------------------------------------
+  - Name: Belink
+    Domain: blockchain.belink.com
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+
+  - Name: XinWang
+    Domain: blockchain.xinwang.com
+    Template:
+      Count: 2
+    Users:
+      Count: 2
+
+  - Name: KeShang
+    Domain: blockchain.keshang.com
+    Template:
+      Count: 2
+    Users:
+      Count: 1

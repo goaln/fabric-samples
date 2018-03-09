@@ -1,0 +1,146 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+
+  orderer.belink.com:
+    container_name: orderer.belink.com
+    image: hyperledger/fabric-orderer:x86_64-1.1.0-alpha
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+    - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+    - ../crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp:/var/hyperledger/orderer/msp
+    - ../crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/tls/:/var/hyperledger/orderer/tls
+    ports:
+      - 7050:7050
+
+  peer0.blockchain.belink.com:
+    container_name: peer0.blockchain.belink.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.blockchain.belink.com
+      - CORE_PEER_ADDRESS=peer0.blockchain.belink.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.blockchain.belink.com:7051
+      - CORE_PEER_LOCALMSPID=BelinkMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 7051:7051
+      - 7053:7053
+
+  peer1.blockchain.belink.com:
+    container_name: peer1.blockchain.belink.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.blockchain.belink.com
+      - CORE_PEER_ADDRESS=peer1.blockchain.belink.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.blockchain.belink.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.blockchain.belink.com:7051
+      - CORE_PEER_LOCALMSPID=BelinkMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer1.blockchain.belink.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.belink.com/peers/peer1.blockchain.belink.com/tls:/etc/hyperledger/fabric/tls
+
+    ports:
+      - 8051:7051
+      - 8053:7053
+
+  peer0.blockchain.xinwang.com:
+    container_name: peer0.blockchain.xinwang.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.blockchain.xinwang.com
+      - CORE_PEER_ADDRESS=peer0.blockchain.xinwang.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.blockchain.xinwang.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.blockchain.xinwang.com:7051
+      - CORE_PEER_LOCALMSPID=XinWangMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 9051:7051
+      - 9053:7053
+
+  peer1.blockchain.xinwang.com:
+    container_name: peer1.blockchain.xinwang.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.blockchain.xinwang.com
+      - CORE_PEER_ADDRESS=peer1.blockchain.xinwang.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.blockchain.xinwang.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.blockchain.xinwang.com:7051
+      - CORE_PEER_LOCALMSPID=XinWangMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer1.blockchain.xinwang.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.xinwang.com/peers/peer1.blockchain.xinwang.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 10051:7051
+      - 10053:7053
+
+  peer0.blockchain.keshang.com:
+    container_name: peer0.blockchain.keshang.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.blockchain.keshang.com
+      - CORE_PEER_ADDRESS=peer0.blockchain.keshang.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.blockchain.keshang.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.blockchain.keshang.com:7051
+      - CORE_PEER_LOCALMSPID=KeShangMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 11051:7051
+      - 11053:7053
+
+  peer1.blockchain.keshang.com:
+    container_name: peer1.blockchain.keshang.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.blockchain.keshang.com
+      - CORE_PEER_ADDRESS=peer1.blockchain.keshang.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.blockchain.keshang.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.blockchain.keshang.com:7051
+      - CORE_PEER_LOCALMSPID=KeShangMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer1.blockchain.keshang.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/blockchain.keshang.com/peers/peer1.blockchain.keshang.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 12051:7051
+      - 12053:7053
