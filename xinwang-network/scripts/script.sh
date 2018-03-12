@@ -125,8 +125,10 @@ joinChannel () {
 
 installChaincode () {
 	PEER=$1
+	chaincodeName=$2
+	chaincodePath=$3
 	setGlobals $PEER
-	peer chaincode install -n loandetail -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/loandetail >&log.txt
+	peer chaincode install -n $chaincodeName -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/$chaincodePath >&log.txt
 	res=$?
 	cat log.txt
         verifyResult $res "Chaincode installation on remote peer PEER$PEER has Failed"
@@ -134,72 +136,18 @@ installChaincode () {
 	echo
 }
 
-installChaincodeTest () {
-	PEER=$1
-	setGlobals $PEER
-	peer chaincode install -n loandetailTest -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/loandetail >&log.txt
-	res=$?
-	cat log.txt
-        verifyResult $res "Chaincode installation on remote peer PEER$PEER has Failed"
-	echo "===================== Chaincode is installed on remote peer PEER$PEER ===================== "
-	echo
-}
 
 instantiateChaincode () {
 	PEER=$1
+	chaincodeName=$2
+	chaincodePath=$3
 	setGlobals $PEER
 	# while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),
 	# lets supply it directly as we know it using the "-o" option
 	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n loandetail -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
+		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
 	else
-		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n loandetail -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('BelinkMSP.member','XinWangMSP.member')" >&log.txt
-	fi
-	res=$?
-	cat log.txt
-	verifyResult $res "Chaincode instantiation on PEER$PEER on channel '$CHANNEL_NAME' failed"
-	echo "===================== Chaincode Instantiation on PEER$PEER on channel '$CHANNEL_NAME' is successful ===================== "
-	echo
-}
-
-instantiateChaincodeTest () {
-	PEER=$1
-	setGlobals $PEER
-	# while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),
-	# lets supply it directly as we know it using the "-o" option
-	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n loandetailTest -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
-	else
-		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n loandetailTest -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
-	fi
-	res=$?
-	cat log.txt
-	verifyResult $res "Chaincode instantiation on PEER$PEER on channel '$CHANNEL_NAME' failed"
-	echo "===================== Chaincode Instantiation on PEER$PEER on channel '$CHANNEL_NAME' is successful ===================== "
-	echo
-}
-
-
-installChaincodePlan () {
-	PEER=$1
-	setGlobals $PEER
-	peer chaincode install -n payPlan -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/payplan >&log.txt
-	res=$?
-	cat log.txt
-        verifyResult $res "Chaincode installation on remote peer PEER$PEER has Failed"
-	echo "===================== Chaincode is installed on remote peer PEER$PEER ===================== "
-	echo
-}
-
-instantiateChaincodePlan () {
-	PEER=$1
-	setGlobals $PEER
-	# while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),
-	# lets supply it directly as we know it using the "-o" option
-	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n payPlan -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('BelinkMSP.member','XinWangMSP.member','KeShangMSP.member')" >&log.txt
-	else
-		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n payPlan -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('BelinkMSP.member','XinWangMSP.member','KeShangMSP.member')" >&log.txt
+		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('BelinkMSP.member','XinWangMSP.member')" >&log.txt
 	fi
 	res=$?
 	cat log.txt
@@ -290,52 +238,26 @@ updateAnchorPeers 0
 echo "Updating anchor peers for org2..."
 updateAnchorPeers 2
 
-## Install chaincode on Peer0/Org1 and Peer2/Org2
-echo "Installing chaincode on org1/peer0..."
-installChaincode 0
-echo "Installing chaincode on org1/peer1..."
-installChaincode 1
-echo "Install chaincode on org2/peer0..."
-installChaincode 2
-echo "Installing chaincode on org2/peer3..."
-installChaincode 3
 
-#Instantiate chaincode on Peer2/Org2
-echo "Instantiating chaincode on org2/peer2..."
-instantiateChaincode 2
+declare -a arr=("acctflow" "loandetail" "paylog" "payplan" "specialbusiness")
 
+for i in "${arr[@]}"
+do
+    ## Install chaincode on Peer0/Org1 and Peer2/Org2
+    echo "Installing chaincode on org1/peer0..."
+    installChaincode 0 $i $i
+    echo "Installing chaincode on org1/peer1..."
+    installChaincode 1 $i $i
+    echo "Install chaincode on org2/peer0..."
+    installChaincode 2 $i $i
+    echo "Installing chaincode on org2/peer3..."
+    installChaincode 3 $i $i
 
-## Install chaincode on Peer0/Org1 and Peer2/Org2
-echo "Installing chaincode on org1/peer0..."
-installChaincodeTest 0
-echo "Installing chaincode on org1/peer1..."
-installChaincodeTest 1
-echo "Install chaincode on org2/peer0..."
-installChaincodeTest 2
-echo "Installing chaincode on org2/peer3..."
-installChaincodeTest 3
-
-#Instantiate chaincode on Peer2/Org2
-echo "Instantiating chaincode on org2/peer2..."
-instantiateChaincodeTest 2
-
-## Install chaincode on Peer0/Org1 and Peer2/Org2
-echo "Installing chaincode on org1/peer0..."
-installChaincodePlan 0
-echo "Installing chaincode on org1/peer1..."
-installChaincodePlan 1
-echo "Install chaincode on org2/peer0..."
-installChaincodePlan 2
-echo "Installing chaincode on org2/peer3..."
-installChaincodePlan 3
-echo "Install chaincode on org2/peer0..."
-installChaincodePlan 4
-echo "Installing chaincode on org2/peer3..."
-installChaincodePlan 5
-
-#Instantiate chaincode on Peer2/Org2
-echo "Instantiating chaincode on org2/peer2..."
-instantiateChaincodePlan 2
+    #Instantiate chaincode on Peer2/Org2
+    echo "Instantiating chaincode on org2/peer2..."
+    instantiateChaincode 2 $i $i
+   # or do whatever with individual element of the array
+done
 
 ##Query on chaincode on Peer0/Org1
 #echo "Querying chaincode on org1/peer0..."
