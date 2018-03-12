@@ -270,6 +270,8 @@ fetchChannelConfig () {
 	echo "===================== fetch config from PEER$PEER on channel '$CHANNEL_NAME' is successful ===================== "
 }
 
+sleep 20
+
 ## Create channel
 echo "Creating channel..."
 createChannel

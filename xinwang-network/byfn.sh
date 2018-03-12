@@ -35,7 +35,7 @@ export FABRIC_CFG_PATH=${PWD}
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  byfn.sh -m up|down|restart|generate [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>]"
+  echo "  byfn.sh -m up|down|restart|generate [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-i <imagetag>]"
   echo "  byfn.sh -h|--help (print this message)"
   echo "    -m <mode> - one of 'up', 'down', 'restart' or 'generate'"
   echo "      - 'up' - bring up the network with docker-compose up"
@@ -47,6 +47,7 @@ function printHelp () {
   echo "    -d <delay> - delay duration in seconds (defaults to 3)"
   echo "    -f <docker-compose-file> - specify which docker-compose file use (defaults to docker-compose-cli.yaml)"
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
+  echo "    -i <imagetag> - pass the image tag to launch the network using the tag: 1.0.1, 1.0.2, 1.0.3, 1.0.4 (defaults to latest)"
   echo
   echo "Typically, one would first generate the required certificates and "
   echo "genesis block, then bring up the network. e.g.:"
@@ -105,15 +106,15 @@ function removeUnwantedImages() {
 # Generate the needed certificates, the genesis block and start the network.
 function networkUp () {
   # generate artifacts if they don't exist
-  if [ ! -d "crypto-config" ]; then
-    generateCerts
-    replacePrivateKey
-    generateChannelArtifacts
-  fi
+  #if [ ! -d "crypto-config" ]; then
+  #  generateCerts
+  #  replacePrivateKey
+  #  generateChannelArtifacts
+  #fi
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
-      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
+      IMAGE_TAG=$IMAGETAG CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
   else
-      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE up -d 2>&1
+      IMAGE_TAG=$IMAGETAG CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE up -d 2>&1
   fi
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
@@ -342,6 +343,8 @@ COMPOSE_FILE=docker-compose-cli.yaml
 COMPOSE_FILE_JOIN=docker-compose-cli-join.yaml
 #
 COMPOSE_FILE_COUCH=docker-compose-couch.yaml
+# default image tag
+IMAGETAG="latest"
 
 # Parse commandline args
 while getopts "h?m:c:t:d:f:s:" opt; do
@@ -361,6 +364,8 @@ while getopts "h?m:c:t:d:f:s:" opt; do
     f)  COMPOSE_FILE=$OPTARG
     ;;
     s)  IF_COUCHDB=$OPTARG
+    ;;
+    i)  IMAGETAG=`uname -m`"-"$OPTARG
     ;;
   esac
 done

@@ -6,7 +6,7 @@
 version: '2'
 
 volumes:
-  orderer1.belink.com:
+  orderer.belink.com:
   orderer1.belink.com:
   peer0.blockchain.belink.com:
   peer1.blockchain.belink.com:
@@ -134,51 +134,51 @@ services:
     networks:
       - byfn
 
-    orderer.belink.com:
-      container_name: orderer.belink.com
-      extends:
-        file: base/dc-orderer-base.yaml
-        service: orderer
-      volumes:
+  orderer.belink.com:
+    container_name: orderer.belink.com
+    extends:
+      file: base/dc-orderer-base.yaml
+      service: orderer
+    volumes:
       - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ./crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp:/var/hyperledger/orderer/msp
       - ./crypto-config/ordererOrganizations/belink.com/orderers/orderer.belink.com/tls/:/var/hyperledger/orderer/tls
       - orderer.belink.com:/var/hyperledger/production/orderer
-      ports:
-        - 7050:7050
-      depends_on:
-        - zookeeper0
-        - zookeeper1
-        - zookeeper2
-        - kafka0
-        - kafka1
-        - kafka2
-        - kafka3
-      networks:
-        - byfn
+    ports:
+      - 7050:7050
+    depends_on:
+      - zookeeper0
+      - zookeeper1
+      - zookeeper2
+      - kafka0
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - byfn
 
-    orderer1.belink.com:
-      container_name: orderer1.belink.com
-      extends:
-        file: base/dc-orderer-base.yaml
-        service: orderer
-      volumes:
+  orderer1.belink.com:
+    container_name: orderer1.belink.com
+    extends:
+      file: base/dc-orderer-base.yaml
+      service: orderer
+    volumes:
       - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ./crypto-config/ordererOrganizations/belink.com/orderers/orderer1.belink.com/msp:/var/hyperledger/orderer/msp
       - ./crypto-config/ordererOrganizations/belink.com/orderers/orderer1.belink.com/tls/:/var/hyperledger/orderer/tls
       - orderer1.belink.com:/var/hyperledger/production/orderer
-      ports:
-        - 17050:7050
-      depends_on:
-        - zookeeper0
-        - zookeeper1
-        - zookeeper2
-        - kafka0
-        - kafka1
-        - kafka2
-        - kafka3
-      networks:
-        - byfn
+    ports:
+      - 17050:7050
+    depends_on:
+      - zookeeper0
+      - zookeeper1
+      - zookeeper2
+      - kafka0
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - byfn
 
   peer0.blockchain.belink.com:
     container_name: peer0.blockchain.belink.com
