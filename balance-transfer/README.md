@@ -7,7 +7,7 @@ A sample Node.js app to demonstrate **__fabric-client__** & **__fabric-ca-client
 * [Docker](https://www.docker.com/products/overview) - v1.12 or higher
 * [Docker Compose](https://docs.docker.com/compose/overview/) - v1.8 or higher
 * [Git client](https://git-scm.com/downloads) - needed for clone commands
-* **Node.js** v6.9.0 - 6.10.0 ( __Node v7+ is not supported__ )
+* **Node.js** v8.4.0 or higher
 * [Download Docker images](http://hyperledger-fabric.readthedocs.io/en/latest/samples.html#binaries)
 
 ```
@@ -27,6 +27,7 @@ Once you have completed the above setup, you will have provisioned a local netwo
 ## Running the sample program
 
 There are two options available for running the balance-transfer sample
+For each of these options, you may choose to run with chaincode written in golang or in node.js.
 
 ### Option 1:
 
@@ -82,9 +83,15 @@ With the application started in terminal 1, next, test the APIs by executing the
 ```
 cd fabric-samples/balance-transfer
 
-./testAPIs.sh
+## To use golang chaincode execute the following command
 
+./testAPIs.sh -l golang
+
+## OR use node.js chaincode
+
+./testAPIs.sh -l node
 ```
+
 
 ## Sample REST APIs Requests
 
@@ -92,7 +99,7 @@ cd fabric-samples/balance-transfer
 
 * Register and enroll new users in Organization - **Org1**:
 
-`curl -s -X POST http://localhost:4000/users -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=org1'`
+`curl -s -X POST http://localhost:4000/users -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=Org1'`
 
 **OUTPUT:**
 
@@ -101,7 +108,7 @@ cd fabric-samples/balance-transfer
   "success": true,
   "secret": "RaxhMgevgJcm",
   "message": "Jim enrolled Successfully",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI"
+  "token": "<put JSON Web Token here>"
 }
 ```
 
@@ -112,7 +119,7 @@ The response contains the success/failure status, an **enrollment Secret** and a
 ```
 curl -s -X POST \
   http://localhost:4000/channels \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
 	"channelName":"mychannel",
@@ -127,10 +134,10 @@ Please note that the Header **authorization** must contain the JWT returned from
 ```
 curl -s -X POST \
   http://localhost:4000/channels/mychannel/peers \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer1","peer2"]
+	"peers": ["peer0.org1.example.com","peer1.org1.example.com"]
 }'
 ```
 ### Install chaincode
@@ -138,12 +145,28 @@ curl -s -X POST \
 ```
 curl -s -X POST \
   http://localhost:4000/chaincodes \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer1","peer2"],
+	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
 	"chaincodeName":"mycc",
-	"chaincodePath":"github.com/example_cc",
+	"chaincodePath":"github.com/example_cc/go",
+	"chaincodeType": "golang",
+	"chaincodeVersion":"v0"
+}'
+```
+**NOTE:** *chaincodeType* must be set to **node** when node.js chaincode is used and *chaincodePath* must be set to the location of the node.js chaincode. Also put in the $PWD
+```
+ex:
+curl -s -X POST \
+  http://localhost:4000/chaincodes \
+  -H "authorization: Bearer <put JSON Web Token here>" \
+  -H "content-type: application/json" \
+  -d '{
+	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
+	"chaincodeName":"mycc",
+	"chaincodePath":"$PWD/artifacts/src/github.com/example_cc/node",
+	"chaincodeType": "node",
 	"chaincodeVersion":"v0"
 }'
 ```
@@ -153,23 +176,27 @@ curl -s -X POST \
 ```
 curl -s -X POST \
   http://localhost:4000/channels/mychannel/chaincodes \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
+	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
 	"chaincodeName":"mycc",
 	"chaincodeVersion":"v0",
+	"chaincodeType": "golang",
 	"args":["a","100","b","200"]
 }'
 ```
+**NOTE:** *chaincodeType* must be set to **node** when node.js chaincode is used
 
 ### Invoke request
 
 ```
 curl -s -X POST \
   http://localhost:4000/channels/mychannel/chaincodes/mycc \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json" \
   -d '{
+	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
 	"fcn":"move",
 	"args":["a","b","10"]
 }'
@@ -180,8 +207,8 @@ curl -s -X POST \
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/channels/mychannel/chaincodes/mycc?peer=peer1&fcn=query&args=%5B%22a%22%5D" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/channels/mychannel/chaincodes/mycc?peer=peer0.org1.example.com&fcn=query&args=%5B%22a%22%5D" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
 
@@ -189,27 +216,27 @@ curl -s -X GET \
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/channels/mychannel/blocks/1?peer=peer1" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/channels/mychannel/blocks/1?peer=peer0.org1.example.com" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
 
 ### Query Transaction by TransactionID
 
 ```
-curl -s -X GET http://localhost:4000/channels/mychannel/transactions/TRX_ID?peer=peer1 \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+curl -s -X GET http://localhost:4000/channels/mychannel/transactions/<put transaction id here>?peer=peer0.org1.example.com \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
-**NOTE**: Here the TRX_ID can be from any previous invoke transaction
+**NOTE**: The transaction id can be from any previous invoke transaction, see results of the invoke request, will look something like `8a95b1794cb17e7772164c3f1292f8410fcfdc1943955a35c9764a21fcd1d1b3`.
 
 
 ### Query ChainInfo
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/channels/mychannel?peer=peer1" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/channels/mychannel?peer=peer0.org1.example.com" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
 
@@ -217,8 +244,8 @@ curl -s -X GET \
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/chaincodes?peer=peer1&type=installed" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/chaincodes?peer=peer0.org1.example.com&type=installed" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
 
@@ -226,8 +253,8 @@ curl -s -X GET \
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/chaincodes?peer=peer1&type=instantiated" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/chaincodes?peer=peer0.org1.example.com&type=instantiated" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
 ```
 
@@ -235,50 +262,33 @@ curl -s -X GET \
 
 ```
 curl -s -X GET \
-  "http://localhost:4000/channels?peer=peer1" \
-  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" \
+  "http://localhost:4000/channels?peer=peer0.org1.example.com" \
+  -H "authorization: Bearer <put JSON Web Token here>" \
   -H "content-type: application/json"
+```
+
+### Clean the network
+
+The network will still be running at this point. Before starting the network manually again, here are the commands which cleans the containers and artifacts.
+
+```
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images | grep dev | awk '{print $3}')
+rm -rf fabric-client-kv-org[1-2]
 ```
 
 ### Network configuration considerations
 
-You have the ability to change configuration parameters by either directly editing the network-config.json file or provide an additional file for an alternative target network. The app uses an optional environment variable "TARGET_NETWORK" to control the configuration files to use. For example, if you deployed the target network on Amazon Web Services EC2, you can add a file "network-config-aws.json", and set the "TARGET_NETWORK" environment to 'aws'. The app will pick up the settings inside the "network-config-aws.json" file.
+You have the ability to change configuration parameters by either directly editing the network-config.yaml file or provide an additional file for an alternative target network. The app uses an optional environment variable "TARGET_NETWORK" to control the configuration files to use. For example, if you deployed the target network on Amazon Web Services EC2, you can add a file "network-config-aws.yaml", and set the "TARGET_NETWORK" environment to 'aws'. The app will pick up the settings inside the "network-config-aws.yaml" file.
 
 #### IP Address** and PORT information
 
-If you choose to customize your docker-compose yaml file by hardcoding IP Addresses and PORT information for your peers and orderer, then you MUST also add the identical values into the network-config.json file. The paths shown below will need to be adjusted to match your docker-compose yaml file.
+If you choose to customize your docker-compose yaml file by hardcoding IP Addresses and PORT information for your peers and orderer, then you MUST also add the identical values into the network-config.yaml file. The url and eventUrl settings will need to be adjusted to match your docker-compose yaml file.
 
 ```
-		"orderer": {
-			"url": "grpcs://x.x.x.x:7050",
-			"server-hostname": "orderer0",
-			"tls_cacerts": "../artifacts/tls/orderer/ca-cert.pem"
-		},
-		"org1": {
-			"ca": "http://x.x.x.x:7054",
-			"peer1": {
-				"requests": "grpcs://x.x.x.x:7051",
-				"events": "grpcs://x.x.x.x:7053",
-				...
-			},
-			"peer2": {
-				"requests": "grpcs://x.x.x.x:7056",
-				"events": "grpcs://x.x.x.x:7058",
-				...
-			}
-		},
-		"org2": {
-			"ca": "http://x.x.x.x:8054",
-			"peer1": {
-				"requests": "grpcs://x.x.x.x:8051",
-				"events": "grpcs://x.x.x.x:8053",
-				...			},
-			"peer2": {
-				"requests": "grpcs://x.x.x.x:8056",
-				"events": "grpcs://x.x.x.x:8058",
-				...
-			}
-		}
+peer1.org1.example.com:
+  url: grpcs://x.x.x.x:7056
+  eventUrl: grpcs://x.x.x.x:7058
 
 ```
 
