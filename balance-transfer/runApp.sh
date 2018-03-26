@@ -30,18 +30,16 @@ function dkrm(){
 function restartNetwork() {
 	echo
 
-        #teardown the network and clean the containers and intermediate images
-	cd artifacts
-	docker-compose down
+  #teardown the network and clean the containers and intermediate images
+	docker-compose -f ./artifacts/docker-compose.yaml down
 	dkcl
 	dkrm
 
-	#Cleanup the material
-	rm -rf /tmp/hfc-test-kvs_peerOrg* $HOME/.hfc-key-store/ /tmp/fabric-client-kvs_peerOrg*
+	#Cleanup the stores
+	rm -rf ./fabric-client-kv-org*
 
 	#Start the network
-	docker-compose up -d
-	cd -
+	docker-compose -f ./artifacts/docker-compose.yaml up -d
 	echo
 }
 
