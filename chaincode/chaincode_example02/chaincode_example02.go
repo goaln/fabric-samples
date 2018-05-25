@@ -34,8 +34,12 @@ import (
 type SimpleChaincode struct {
 }
 
+var logger = shim.NewLogger("chaincode_example02")
+
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("ex02 Init")
+	logger.SetLevel(shim.LogInfo)	
+
 	_, args := stub.GetFunctionAndParameters()
 	var A, B string    // Entities
 	var Aval, Bval int // Asset holdings
@@ -75,6 +79,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("ex02 Invoke")
 	function, args := stub.GetFunctionAndParameters()
+	logger.Info("================chaincode example 02 logging=================")
 	if function == "invoke" {
 		// Make payment of X units from A to B
 		return t.invoke(stub, args)
