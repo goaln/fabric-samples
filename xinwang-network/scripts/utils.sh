@@ -6,6 +6,8 @@
 
 # This is a collection of bash functions used by different scripts
 
+CRYPTO_PATH=${BASE_PATH}/peer/crypto
+CHANNEL_PATH=${BASE_PATH}/channel-artifacts
 
 # verify the result of the end-to-end test
 verifyResult () {
@@ -20,41 +22,40 @@ verifyResult () {
 # Set OrdererOrg.Admin globals
 setOrdererGlobals() {
         CORE_PEER_LOCALMSPID="OrdererMSP"
-        CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp/tlscacerts/tlsca.belink.com-cert.pem
-        CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/belink.com/users/Admin@belink.com/msp
+        CORE_PEER_TLS_ROOTCERT_FILE=${CRYPTO_PATH}/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp/tlscacerts/tlsca.belink.com-cert.pem
+        CORE_PEER_MSPCONFIGPATH=${CRYPTO_PATH}/ordererOrganizations/belink.com/users/Admin@belink.com/msp
 }
 
 setGlobals () {
 	PEER=$1
 	ORG=$2
-	if [ $ORG -eq 0 -o $ORG -eq 1 ] ; then
+	if [ $ORG -eq 1 ] ; then
 		CORE_PEER_LOCALMSPID="BelinkMSP"
-		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/tls/ca.crt
-		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.belink.com/users/Admin@blockchain.belink.com/msp
+		CORE_PEER_TLS_ROOTCERT_FILE=${CRYPTO_PATH}/peerOrganizations/blockchain.belink.com/peers/peer0.blockchain.belink.com/tls/ca.crt
+		CORE_PEER_MSPCONFIGPATH=${CRYPTO_PATH}/peerOrganizations/blockchain.belink.com/users/Admin@blockchain.belink.com/msp
 		if [ $PEER -eq 0 ]; then
 			CORE_PEER_ADDRESS=peer0.blockchain.belink.com:7051
 		else
 			CORE_PEER_ADDRESS=peer1.blockchain.belink.com:7051
-			CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.belink.com/users/Admin@blockchain.belink.com/msp
 		fi
-	elif [ $ORG -eq 2 -o $ORG -eq 3 ] ; then
+	elif [ $ORG -eq 2 ] ; then
 		CORE_PEER_LOCALMSPID="XinWangMSP"
-		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/tls/ca.crt
-		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.xinwang.com/users/Admin@blockchain.xinwang.com/msp
-		if [ $PEER -eq 2 ]; then
+		CORE_PEER_TLS_ROOTCERT_FILE=${CRYPTO_PATH}/peerOrganizations/blockchain.xinwang.com/peers/peer0.blockchain.xinwang.com/tls/ca.crt
+		CORE_PEER_MSPCONFIGPATH=${CRYPTO_PATH}/peerOrganizations/blockchain.xinwang.com/users/Admin@blockchain.xinwang.com/msp
+		if [ $PEER -eq 0 ]; then
 			CORE_PEER_ADDRESS=peer0.blockchain.xinwang.com:7051
 		else
 			CORE_PEER_ADDRESS=peer1.blockchain.xinwang.com:7051
-		fi
-	else
-    	CORE_PEER_LOCALMSPID="KeShangMSP"
-        CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/tls/ca.crt
-        CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/blockchain.keshang.com/users/Admin@blockchain.keshang.com/msp
-        if [ $PEER -eq 4 ]; then
-            CORE_PEER_ADDRESS=peer0.blockchain.keshang.com:7051
-        else
-            CORE_PEER_ADDRESS=peer1.blockchain.keshang.com:7051
-        fi
+    fi
+	elif [ $ORG -eq 3 ] ; then
+    CORE_PEER_LOCALMSPID="KeShangMSP"
+    CORE_PEER_TLS_ROOTCERT_FILE=${CRYPTO_PATH}/peerOrganizations/blockchain.keshang.com/peers/peer0.blockchain.keshang.com/tls/ca.crt
+    CORE_PEER_MSPCONFIGPATH=${CRYPTO_PATH}/peerOrganizations/blockchain.keshang.com/users/Admin@blockchain.keshang.com/msp
+    if [ $PEER -eq 0 ]; then
+      CORE_PEER_ADDRESS=peer0.blockchain.keshang.com:7051
+    else
+      CORE_PEER_ADDRESS=peer1.blockchain.keshang.com:7051
+    fi
 	else
 		echo "================== ERROR !!! ORG Unknown =================="
 	fi
@@ -70,12 +71,12 @@ updateAnchorPeers() {
 
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
                 set -x
-		peer channel update -o orderer.belink.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx >&log.txt
+		peer channel update -o orderer.belink.com:7050 -c $CHANNEL_NAME -f ${CHANNEL_PATH}/${CORE_PEER_LOCALMSPID}anchors.tx >&log.txt
 		res=$?
                 set +x
   else
                 set -x
-		peer channel update -o orderer.belink.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
+		peer channel update -o orderer.belink.com:7050 -c $CHANNEL_NAME -f ${CHANNEL_PATH}/${CORE_PEER_LOCALMSPID}anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
 		res=$?
                 set +x
   fi
