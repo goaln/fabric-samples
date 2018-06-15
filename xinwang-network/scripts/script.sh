@@ -231,6 +231,7 @@ joinChannel
 ### Join all the peers to the channel
 echo "fetch channel config from orderer..."
 fetchChannelConfig 0
+
 #
 ### Set the anchor peers for each org in the channel
 #echo "Updating anchor peers for org1..."
@@ -257,6 +258,7 @@ do
     #Instantiate chaincode on Peer2/Org2
     echo "Instantiating chaincode on org2/peer2..."
     instantiateChaincode 2 ${i} $i
+
    # or do whatever with individual element of the array
 done
 

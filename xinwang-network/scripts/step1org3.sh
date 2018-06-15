@@ -22,7 +22,9 @@ TIMEOUT="$4"
 LANGUAGE=`echo "$LANGUAGE" | tr [:upper:] [:lower:]`
 COUNTER=1
 MAX_RETRY=5
-ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp/tlscacerts/tlsca.belink.com-cert.pem
+BASE_PATH=/opt/gopath/src/github.com/hyperledger/fabric
+ORDERER_CA=${BASE_PATH}/peer/crypto/ordererOrganizations/belink.com/orderers/orderer.belink.com/msp/tlscacerts/tlsca.belink.com-cert.pem
+CORE_PEER_TLS_ENABLED=true
 
 CC_SRC_PATH="github.com/chaincode/chaincode_example02/go/"
 if [ "$LANGUAGE" = "node" ]; then
@@ -63,7 +65,7 @@ echo "========= Submitting transaction from a different peer (peer0.org2) which 
 echo
 setGlobals 0 2
 set -x
-# peer channel update -f org3_update_in_envelope.pb -c ${CHANNEL_NAME} -o orderer.belink.com:7050 --tls --cafile ${ORDERER_CA}
+peer channel update -f org3_update_in_envelope.pb -c ${CHANNEL_NAME} -o orderer.belink.com:7050 --tls --cafile ${ORDERER_CA}
 set +x
 
 echo
