@@ -145,11 +145,10 @@ instantiateChaincode () {
 	# while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),
 	# lets supply it directly as we know it using the "-o" option
 	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
+		peer chaincode instantiate -o orderer.belink.com:7050 -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","0"]}' -P "OR ('BelinkMSP.member','XinWangMSP.member')" >&log.txt
 	else
-		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND	('BelinkMSP.member','XinWangMSP.member')" >&log.txt
-	        #peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","200"]}' >&log.txt
-        fi
+		peer chaincode instantiate -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n $chaincodeName -v 1.0 -c '{"Args":["init","a","100","b","0"]}' -P "OR	('BelinkMSP.member','XinWangMSP.member')" >&log.txt
+	fi
 	res=$?
 	cat log.txt
 	verifyResult $res "Chaincode instantiation on PEER$PEER on channel '$CHANNEL_NAME' failed"
@@ -219,18 +218,18 @@ fetchChannelConfig () {
 	echo "===================== fetch config from PEER$PEER on channel '$CHANNEL_NAME' is successful ===================== "
 }
 
-sleep 40
+#sleep 40
 ## Create channel
-echo "Creating channel..."
-createChannel
+#echo "Creating channel..."
+#createChannel
 #
 ### Join all the peers to the channel
-echo "Having all peers join the channel..."
-joinChannel
+#echo "Having all peers join the channel..."
+#joinChannel
 #
 ### Join all the peers to the channel
-echo "fetch channel config from orderer..."
-fetchChannelConfig 0
+#echo "fetch channel config from orderer..."
+#fetchChannelConfig 0
 #
 ### Set the anchor peers for each org in the channel
 #echo "Updating anchor peers for org1..."
@@ -240,25 +239,36 @@ fetchChannelConfig 0
 
 
 #declare -a arr=("loandetail")
-declare -a arr=("acctflow" "loandetail" "paylog" "payplan" "specialbusiness" "upload")
+#declare -a arr=( "chaincode_example02" "chaincode_example04" "chaincode_example05")
+declare -a arr=( "chaincode_example02")
 
 for i in "${arr[@]}"
 do
-    ## Install chaincode on Peer0/Org1 and Peer2/Org2
+    # Install chaincode on Peer0/Org1 and Peer2/Org2
     echo "Installing chaincode on org1/peer0..."
     installChaincode 0 ${i} $i
-    echo "Installing chaincode on org1/peer1..."
-    installChaincode 1 ${i} $i
-    echo "Install chaincode on org2/peer0..."
-    installChaincode 2 ${i} $i
-    echo "Installing chaincode on org2/peer3..."
-    installChaincode 3 ${i} $i
+    #echo "Installing chaincode on org1/peer1..."
+    #installChaincode 1 ${i} $i
+    #echo "Install chaincode on org2/peer0..."
+    #installChaincode 2 ${i} $i
+    #echo "Installing chaincode on org2/peer3..."
+    #installChaincode 3 ${i} $i
 
     #Instantiate chaincode on Peer2/Org2
     echo "Instantiating chaincode on org2/peer2..."
-    instantiateChaincode 2 ${i} $i
-   # or do whatever with individual element of the array
+    instantiateChaincode 0 ${i} $i
+    #or do whatever with individual element of the array
 done
+
+#echo "Instantiating chaincode on org2/peer2..."
+#instantiateChaincode 0 "chaincode_example04" "chaincode_example04"
+
+#echo "Installing chaincode on org1/peer0..."
+#installChaincode 0 "chaincode_example02" "chaincode_example02"
+#echo "Instantiating chaincode on org2/peer2..."
+#instantiateChaincode 0 "chaincode_example02" "chaincode_example02"
+
+
 
 ##Query on chaincode on Peer0/Org1
 #echo "Querying chaincode on org1/peer0..."
@@ -276,9 +286,9 @@ updateChaincode () {
     PEER=$1
 	setGlobals $PEER
 	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-        peer chaincode upgrade -o orderer.belink.com:7050  -C $CHANNEL_NAME -n payplan -v 2.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND	('BelinkMSP.member','XinWangMSP.member')"
+        peer chaincode upgrade -o orderer.belink.com:7050  -C $CHANNEL_NAME -n chaincode_example02 -v 1.1 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('BelinkMSP.member','XinWangMSP.member')"
     else
-        peer chaincode upgrade -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n payplan -v 2.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND	('BelinkMSP.member','XinWangMSP.member')"
+        peer chaincode upgrade -o orderer.belink.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n chaincode_example02 -v 1.1 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('BelinkMSP.member','XinWangMSP.member')"
     fi
 }
 
